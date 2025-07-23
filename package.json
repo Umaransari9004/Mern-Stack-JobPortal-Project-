@@ -1,4 +1,5 @@
 {
+  "homepage": "https://umaransari.github.io/Mern-Stack-JobPortal-Project-",
   "name": "backend",
   "version": "1.0.0",
   "description": "job portal backend",
@@ -8,10 +9,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev":"nodemon Backend/index.js",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
+    "dev": "nodemon Backend/index.js",
     "start": "node Backend/index.js",
     "server": "nodemon Backend/index.js",
-    "build":"npm install && npm install --prefix jobportal && npm run build --prefix jobportal"
+    "build": "npm install && npm install --prefix jobportal && npm run build --prefix jobportal"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -21,6 +24,7 @@
     "datauri": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "gh-pages": "^6.3.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
