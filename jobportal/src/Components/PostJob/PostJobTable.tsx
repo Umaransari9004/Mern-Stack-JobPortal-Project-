@@ -14,7 +14,6 @@ const PostJobTable = () => {
     const [filterJobs, setFilterJobs] = useState(allAdminJobs);
 
     useEffect(()=>{ 
-        console.log('called');
         const filteredJobs = allAdminJobs.filter((job)=>{
             if(!searchJobByText){
                 return true;

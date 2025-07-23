@@ -8,11 +8,13 @@ import authRoutr from "./routes/authRoutr.js";
 import companyRoute from "./routes/companyRoute.js";
 import jobRoute from "./routes/jobRoutes.js";
 import applicationRoute from "./routes/applicationRoute.js";
+import path from "path";
 
 dotenv.config({});
 connectDB();
-
 const app = express();
+
+const _dirname = path.resolve();
 
 // middleware
 app.use(express.json());
@@ -31,6 +33,10 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/application", applicationRoute);
 
+app.use(express.static(path.join(_dirname, "/jobportal/build")));
+app.get('*', (_,res) => {
+    res.sendFile(path.resolve(_dirname, "jobportal", "build", "index.html"));
+})
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
