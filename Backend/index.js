@@ -20,7 +20,7 @@ const __dirname = path.resolve();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 const corsOptions = {
-    origin:'http://localhost:3000',
+    origin:'https://mern-stack-jobportal-project.onrender.com',
     credentials:true
 }
 app.use(cors(corsOptions));
