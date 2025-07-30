@@ -14,7 +14,7 @@ dotenv.config({});
 connectDB();
 const app = express();
 
-const _dirname = path.resolve();
+const __dirname = path.resolve();
 
 // middleware
 app.use(express.json());
@@ -33,9 +33,9 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/application", applicationRoute);
 
-app.use(express.static(path.join(_dirname, "/jobportal/build")));
+app.use(express.static(path.join(__dirname, "/jobportal/build")));
 app.get('*', (_,res) => {
-    res.sendFile(path.resolve(_dirname, "jobportal", "build", "index.html"));
+    res.sendFile(path.resolve(__dirname, "jobportal", "build", "index.html"));
 })
 
 const PORT = process.env.PORT || 3000
