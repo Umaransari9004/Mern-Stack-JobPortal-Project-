@@ -9,11 +9,19 @@ const useSavedJobs = () => {
 
     // Fetch saved jobs on mount
     useEffect(() => {
+        // ✅ NEW: Stop API call if user is not logged in
+        if (!user) {
+            dispatch(setAllSavedJobs([]));  // ✅ Clear saved jobs on logout
+            return;
+        }
         const fetchSavedJobs = async () => {
             try {
                 const response = await fetch(`${JOB_API_END_POINT}/saved`, {
                     credentials: 'include' // Send cookies automatically
                 });
+
+                if (response.status === 401) return;
+
                 const data = await response.json();
                 if (data.success) {
                     dispatch(setAllSavedJobs(data.savedJobs));
@@ -26,7 +34,12 @@ const useSavedJobs = () => {
     }, [dispatch, user]);
 
     // Save job handler
-    const saveJob = async (jobId) => {
+    const saveJob = async (jobId:any) => {
+        // ✅ NEW: Prevent saving if not logged in
+        if (!user) {
+            console.warn("Login required to save jobs");
+            return;
+        }
         if (!jobId) {
             console.error('Invalid jobId provided.');
             return;
@@ -58,7 +71,8 @@ const useSavedJobs = () => {
     };
     
     // Unsave job handler
-    const unsaveJob = async (jobId) => {
+    const unsaveJob = async (jobId:any) => {
+        if (!user) return;
         try {
             const response = await fetch(`${JOB_API_END_POINT}/unsave`, {
                 method: 'PUT',

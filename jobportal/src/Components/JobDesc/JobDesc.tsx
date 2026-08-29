@@ -1,7 +1,7 @@
-import { ActionIcon, Button, Divider } from '@mantine/core'
-import { IconBookmark, IconBookmarkFilled } from '@tabler/icons-react'
+import { ActionIcon, Badge, Button, Divider } from '@mantine/core'
+import { IconBookmark, IconBookmarkFilled, IconPlayerStop, IconRefresh } from '@tabler/icons-react'
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import DOMPurify from 'dompurify';
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
@@ -10,6 +10,7 @@ import { card } from '../../Data/JobDescData.tsx';
 import { APPLICATION_API_END_POINT, JOB_API_END_POINT } from '../../utils/constant.js';
 import { setSingleJob } from '../../Slices/Jobslice.tsx';
 import useSavedJobs from '../../hooks/useGetAllSavedJob.tsx';
+import ApplyJobModal from './ApplyJobModal.tsx';
 
 const JobDesc = () => {
     const { singleJob, allSavedJobs } = useSelector((store: any) => store.job);
@@ -30,41 +31,27 @@ const JobDesc = () => {
 
     const data = DOMPurify.sanitize(singleJob?.description);
     const { user } = useSelector((store: any) => store.auth);
-    const isIntiallyApplied = singleJob?.applications?.some(application => application.applicant === user?._id) || false;
+    const isIntiallyApplied = singleJob?.applications?.some((application: any) => application.applicant === user?._id) || false;
     const [isApplied, setIsApplied] = useState(isIntiallyApplied);
+    const [applyModalOpened, setApplyModalOpened] = useState(false);
 
     const params = useParams();
     const jobId = params.id;
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const fromTab = location.state?.fromTab;
 
+    const isClosed = singleJob?.status === 'closed';
+    const isDraft = singleJob?.status === 'draft';
 
-    const applyJobHandler = async () => {
-        try {
-            const res = await axios.get(`${APPLICATION_API_END_POINT}/apply/${jobId}`, { withCredentials: true });
-            console.log(res)
-            if (res.data.success) {
-                setIsApplied(true); // Update the local state
-                const updatedSingleJob = { ...singleJob, applications: [...singleJob.applications, { applicant: user?._id }] }
-                dispatch(setSingleJob(updatedSingleJob)); // helps us to real time UI update
-                notifications.show({
-                    message: (res.data.message),
-                    withBorder: true,
-                    className: '!border-blue-500',
-                })
+    const handleApplySuccess = () => {
+        setIsApplied(true);
+        const updatedSingleJob = { ...singleJob, applications: [...singleJob.applications, { applicant: user?._id }] };
+        dispatch(setSingleJob(updatedSingleJob));
+    };
 
-            }
-        } catch (error) {
-            console.log(error);
-            notifications.show({
-                message: (error.response.data.message),
-                color: "red",
-                withBorder: true,
-                className: '!border-red-500',
-            })
-        }
-    }
-
-    const savedJobIds = allSavedJobs.map(job => job._id);
+    const savedJobIds = allSavedJobs.map((job: any) => job._id);
     const handleSaveToggle = () => {
         if (savedJobIds.includes(jobId)) {
             unsaveJob(jobId);
@@ -80,7 +67,7 @@ const JobDesc = () => {
 
                 if (res.data.success) {
                     dispatch(setSingleJob(res.data.job));
-                    setIsApplied(res.data.job.applications.some(application => application.applicant === user?._id)) // Ensure the state is in sync with fetched data
+                    setIsApplied(res.data.job.applications.some((application: any) => application.applicant === user?._id)) // Ensure the state is in sync with fetched data
                 }
             } catch (error) {
                 console.log(error);
@@ -89,9 +76,13 @@ const JobDesc = () => {
         fetchSingleJob();
     }, [jobId, dispatch, user?._id]);
 
+    const daysAgoText = daysAgoFunction(singleJob?.createdAt) === 0 ? "Today" : `${daysAgoFunction(singleJob?.createdAt)} days ago`;
+
     return (
         <div className="sm-mx:w-full w-[80%]">
-            <p className='text-xs  text-red-600 font-bold text-center my-3'>*Please Update Profile and Add Resume in Profile first, before Apply jobs</p>
+            {user?.role !== 'employer' && (!user?.profile?.resume || !user?.profile?.phoneNumber || !user?.profile?.skills?.length) && (
+                <p className='text-xs text-red-600 font-bold text-center my-3'>*Please Update Profile and Add Resume in Profile first, before Apply jobs</p>
+            )}
             <div className="flex justify-between xs-mx:gap-2">
                 <div className="flex gap-2 items-center ">
                     {/* <div className="p-3 bg-blue-100 rounded-xl">
@@ -99,24 +90,85 @@ const JobDesc = () => {
 
                     </div> */}
                     <div className="flex flex-col gap-1">
-                        <div className="font-semibold text-2xl xs-mx:text-lg">{singleJob?.jobTitle}</div>
-                        <div className="text-lg text-gray-700 xs-mx:text-sm"> Posted {daysAgoFunction(singleJob?.createdAt) === 0 ? "Today" : `${daysAgoFunction(singleJob?.createdAt)} days ago`} &bull; {singleJob?.applications?.length} Applicants</div>
+                        <div className="flex items-center gap-3">
+                            <div className="font-semibold text-2xl xs-mx:text-lg">{singleJob?.jobTitle}</div>
+                            {isClosed && (
+                                <Badge color="red" variant="light" size="lg">Closed</Badge>
+                            )}
+                            {isDraft && (
+                                <Badge color="yellow" variant="light" size="lg">Draft</Badge>
+                            )}
+                        </div>
+                        <div className="text-lg text-gray-700 xs-mx:text-sm"> Posted {daysAgoText} &bull; {singleJob?.applications?.length} Applicants</div>
                         {/* {singleJob?.company} &bull; */}
                     </div>
                 </div>
                 <div className="flex flex-col gap-2 items-center">
+                    {user?.role === 'employer' ? (
+                        <div className="flex flex-col gap-2">
+                            <Button 
+                                onClick={() => navigate(`/post-job/${jobId}`)}
+                                size="sm"
+                                color='blue.4' variant="light">
+                                Edit Job
+                            </Button>
+                            {(singleJob?.status || 'active') === 'active' && (
+                                <Button 
+                                    onClick={async () => {
+                                        try {
+                                            const res = await axios.put(`${JOB_API_END_POINT}/close/${jobId}`, {}, { withCredentials: true });
+                                            if (res.data.success) {
+                                                dispatch(setSingleJob({ ...singleJob, status: 'closed' }));
+                                                notifications.show({ title: 'Job Closed', message: res.data.message, color: 'blue' });
+                                            }
+                                        } catch (error) { console.error(error); }
+                                    }}
+                                    size="sm"
+                                    color='red' variant="light"
+                                    leftSection={<IconPlayerStop size={16} />}>
+                                    Close Job
+                                </Button>
+                            )}
+                            {singleJob?.status === 'closed' && (
+                                <Button 
+                                    onClick={async () => {
+                                        try {
+                                            const res = await axios.put(`${JOB_API_END_POINT}/update/${jobId}`, { status: 'active' }, { withCredentials: true, headers: { 'Content-Type': 'application/json' } });
+                                            if (res.data.success) {
+                                                dispatch(setSingleJob({ ...singleJob, status: 'active' }));
+                                                notifications.show({ title: 'Job Re-activated', message: 'Job is now active and visible to applicants.', color: 'green' });
+                                            }
+                                        } catch (error) { console.error(error); }
+                                    }}
+                                    size="sm"
+                                    color='green' variant="light"
+                                    leftSection={<IconRefresh size={16} />}>
+                                    Re-activate
+                                </Button>
+                            )}
+                        </div>
+                    ) : (
+                        <>
+                            {isClosed ? (
+                                <Button disabled color='red' size="sm" variant='light'
+                                    className='rounded-lg !bg-red-50 !text-red-400 cursor-not-allowed'>
+                                    Job Closed
+                                </Button>
+                            ) : (
+                                <Button onClick={isApplied ? undefined : () => setApplyModalOpened(true)}
+                                    disabled={isApplied} color='blue.4' size="sm" variant={isApplied ? 'light' : 'filled'}
+                                    className={`rounded-lg ${isApplied ? '!bg-green-100 !text-green-400 cursor-not-allowed' : ''}`}>
+                                    {isApplied ? 'Applied' : 'Apply'}
+                                </Button>
+                            )}
 
-                    <Button onClick={isApplied ? undefined : applyJobHandler}
-                        disabled={isApplied} color='blue.4' size="sm" variant="light"
-                        className={`rounded-lg ${isApplied ? '!bg-green-100 !text-green-400 !rounded-r-sm cursor-not-allowed' : 'bg-[#7209b7] hover:bg-[#5f32ad]'}`}>
-                        {isApplied ? 'Applied' : 'Apply Now'}
-                    </Button>
-
-                    {savedJobIds.includes(jobId) ?
-                        <IconBookmarkFilled onClick={handleSaveToggle} className="cursor-pointer text-blue-500" stroke={1.5} />
-                        :
-                        <IconBookmark onClick={handleSaveToggle} className="text-gray-700 cursor-pointer hover:text-blue-500" stroke={1.5} />
-                    }
+                            {savedJobIds.includes(jobId) ?
+                                <IconBookmarkFilled onClick={handleSaveToggle} className="cursor-pointer text-blue-500" stroke={1.5} />
+                                :
+                                <IconBookmark onClick={handleSaveToggle} className="text-gray-700 cursor-pointer hover:text-blue-500" stroke={1.5} />
+                            }
+                        </>
+                    )}
                 </div>
             </div>
             <Divider my="xl" />
@@ -146,6 +198,19 @@ const JobDesc = () => {
             <Divider my="xl" />
             <div className="[&_h4]:text-xl [&_*]:text-gray-600 [&_li]:mb-1 [&_h4]:my-5 [&_h4]:font-semibold [&_h4]:text-gray-700 [&_p]:text-justify lg-mx:[&_p]:text-sm lg-mx:[&_li]:text-sm" dangerouslySetInnerHTML={{ __html: data }}>
             </div>
+
+            {/* Apply Job Modal */}
+            <ApplyJobModal
+                opened={applyModalOpened}
+                onClose={() => setApplyModalOpened(false)}
+                jobId={jobId || ''}
+                jobTitle={singleJob?.jobTitle || ''}
+                companyName={singleJob?.company?.name || ''}
+                companyLogo={singleJob?.company?.logo || ''}
+                daysAgo={daysAgoText}
+                applicantCount={singleJob?.applications?.length || 0}
+                onApplySuccess={handleApplySuccess}
+            />
         </div>
     )
 }

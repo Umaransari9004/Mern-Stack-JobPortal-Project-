@@ -25,7 +25,7 @@ const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleSubmit = async (values) => {
+  const handleSubmit = async (values:any) => {
     try {
       dispatch(setLoading(true));
       const res = await axios.post(`${USER_API_END_POINT}/login`, values, {
@@ -96,13 +96,18 @@ const Login = () => {
             placeholder="Password"
             {...form.getInputProps('password')}
           />
+          <div className="text-right -mt-2">
+            <Link to="/forgot-password" className="text-sm text-blue-400 hover:underline">
+              Forgot Password?
+            </Link>
+          </div>
 
           {loading ? (
             <Button className="w-full my-4">
               <IconLoader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
             </Button>
           ) : (
-            <Button type="submit" autoContrast variant="filled" className="w-full my-4">
+            <Button type="submit" variant="filled" className="w-full my-4">
               Login
             </Button>
           )}

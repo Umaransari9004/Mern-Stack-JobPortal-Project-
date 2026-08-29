@@ -1,7 +1,7 @@
-import { Avatar, Burger, Button, Drawer, Indicator } from "@mantine/core";
-import { IconBell, IconBriefcase, IconSettings, IconX } from "@tabler/icons-react";
+import { Burger, Button, Drawer, Indicator } from "@mantine/core";
+import { IconBriefcase, IconMessageDots, IconX } from "@tabler/icons-react";
 import NavLinks from "./NavLinks.tsx";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProfileMenu from "./ProfileMenu.tsx";
 import { useSelector } from "react-redux";
 import { useDisclosure } from "@mantine/hooks";
@@ -25,7 +25,9 @@ const Header = () => {
 
     const [opened, { open, close }] = useDisclosure(false);
     const { user } = useSelector((store: any) => store.auth);
+    const { unreadCount } = useSelector((store: any) => store.chat);
     const location = useLocation();
+    const navigate = useNavigate();
     const allLinks = [...nonRecruiterLinks, ...recruiterLinks];
 
     // Determine which links to display based on the user's role or login status
@@ -34,18 +36,59 @@ const Header = () => {
             ? recruiterLinks
             : nonRecruiterLinks
         : allLinks;
+
+    const isMessagesActive = location.pathname.startsWith('/messages');
+
     const shouldShow = !location.pathname.startsWith('/admin') &&
         location.pathname !== "/signup" &&
         location.pathname !== "/login";
-    return shouldShow ? (<div className="w-full bg-white px-6 shadow-lg text-black h-20 flex justify-between items-center font-['poppins']">
+    return shouldShow ? (<div className="w-full bg-white px-6 text-black h-20 flex justify-between items-center font-['poppins']">
         <div className="flex gap-2 items-center text-blue-400">
             <IconBriefcase className="h-9 w-9 stroke={2.5}" />
             <div className="xs-mx:hidden text-2xl font-semibold">JobPortal</div>
         </div>
         <NavLinks />
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-3 items-center">
+            {user && (
+                <div
+                    onClick={() => navigate('/messages')}
+                    className="group relative cursor-pointer p-2"
+                    title="Messages"
+                >
+                    <IconMessageDots
+                        size={24}
+                        stroke={1.8}
+                        className="text-black group-hover:text-blue-400 transition-colors"
+                    />
+                    {unreadCount > 0 && (
+                        <span
+                            style={{
+                                position: 'absolute',
+                                top: 0,
+                                right: 0,
+                                minWidth: 18,
+                                height: 18,
+                                borderRadius: 9,
+                                backgroundColor: '#fa5252',
+                                color: 'white',
+                                fontSize: 11,
+                                fontWeight: 700,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '0 4px',
+                                border: '2px solid white',
+                                lineHeight: 1,
+                                transform: 'translate(4px, -4px)',
+                            }}
+                        >
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                    )}
+                </div>
+            )}
             {user ? <ProfileMenu /> : <Link to="/login">
-                <Button variant="subtle" color="blue.4">Login</Button>
+                <Button className="mx-2" variant="subtle" color="blue.4">Login</Button>
                 <Link to="/signup">
                     <Button variant="light" color="blue.5">SignUp</Button>
                 </Link></Link>}
@@ -63,6 +106,13 @@ const Header = () => {
                             </Link>
                         </div>
                     ))}
+                    {user && (
+                        <div className="flex h-full items-center">
+                            <Link className="hover:text-blue-400 text-xl" to="/messages">
+                                Messages
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
             </Drawer>

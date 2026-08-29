@@ -1,4 +1,5 @@
 import { Company } from "../modles/companyModle.js";
+import { Job } from "../modles/jobsModel.js";
 import getDataUri from "../config/datauri.js";
 import cloudinary from "../config/cloudinary.js";
 
@@ -69,6 +70,36 @@ export const getCompanyById = async (req, res) => {
         console.log(error);
     }
 }
+
+// get company profile (company details + active jobs)
+export const getCompanyProfile = async (req, res) => {
+    try {
+        const companyId = req.params.id;
+        const company = await Company.findById(companyId);
+        if (!company) {
+            return res.status(404).json({
+                message: "Company not found.",
+                success: false
+            })
+        }
+        // Fetch active jobs for this company
+        const jobs = await Job.find({ company: companyId, status: 'active' })
+            .populate('company')
+            .sort({ createdAt: -1 });
+        return res.status(200).json({
+            company,
+            jobs,
+            success: true
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Something went wrong.",
+            success: false
+        });
+    }
+}
+
 export const updateCompany = async (req, res) => {
     try {
         const { name, description, website, location } = req.body;

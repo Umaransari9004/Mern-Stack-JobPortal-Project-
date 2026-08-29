@@ -35,8 +35,8 @@ const NavLinks = () => {
         <li key={index}>
           <Link
             to={`/${link.url}`}
-            className={`${
-              location.pathname === `/${link.url}` ? "text-blue-400" : ""
+            className={`transition-colors hover:text-blue-400 ${
+              location.pathname === `/${link.url}` ? "text-blue-400" : "text-gray-700"
             }`}
           >
             {link.name}

@@ -13,31 +13,29 @@ const jobSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        required: true
     },
     about: {
         type: String,
-        required: true
     },
     skills: [{
         type: String,
-        required: true
     }],
     salary: {
         type: Number,
-        required: true
     },
     experience: {
         type: String,
-        required: true,
     },
     location: {
         type: String,
-        required: true
     },
     jobType: {
         type: String,
-        required: true
+    },
+    status: {
+        type: String,
+        enum: ['draft', 'active', 'closed'],
+        default: 'active',
     },
     created_by: {
         type: mongoose.Schema.Types.ObjectId,

@@ -1,7 +1,7 @@
 import { Anchor, Button, Group, PasswordInput, Radio, TextInput } from '@mantine/core';
 import { useForm, isEmail, isNotEmpty, matchesField } from '@mantine/form';
-import { IconArrowLeft, IconAt, IconLoader2, IconLock } from '@tabler/icons-react';
-import React, { useEffect } from 'react';
+import { IconArrowLeft, IconAt, IconLoader2, IconLock, IconMailForward } from '@tabler/icons-react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
@@ -10,6 +10,10 @@ import { USER_API_END_POINT } from '../../utils/constant.js';
 import { setLoading } from '../../Slices/Userslice.tsx';
 
 const Signup = () => {
+
+  const [signupDone, setSignupDone] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
   const form = useForm({
     initialValues: {
       name: '',
@@ -52,9 +56,10 @@ const Signup = () => {
       });
 
       if (res.data.success) {
-        navigate('/login');
+        setRegisteredEmail(values.email);
+        setSignupDone(true);
         notifications.show({
-          title: 'Registration Successful',
+          title: 'Account Created',
           message: res.data.message,
           withBorder: true,
           className: '!border-blue-500',
@@ -74,6 +79,39 @@ const Signup = () => {
     }
   };
 
+  // Resend verification email
+  const handleResend = async () => {
+    try {
+      setResendLoading(true);
+      const res = await axios.post(`${USER_API_END_POINT}/resend-verification`, 
+        { email: registeredEmail },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        }
+      );
+
+      if (res.data.success) {
+        notifications.show({
+          title: 'Email Sent!',
+          message: res.data.message,
+          withBorder: true,
+          className: '!border-blue-500',
+        });
+      }
+    } catch (error: any) {
+      notifications.show({
+        title: 'Error',
+        message: error?.response?.data?.message || 'Failed to resend email.',
+        color: 'red',
+        withBorder: true,
+        className: '!border-red-500',
+      });
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       navigate('/');
@@ -83,6 +121,50 @@ const Signup = () => {
   return (
     <div className="flex items-center justify-center min-h-screen sm-mx:bg-white bg-gray-100">
       <div className="w-1/2 sm-mx:w-full px-20 bs-mx:px-10 sm-mx:px-5 flex flex-col justify-center gap-3 bg-white p-8 sm-mx:p-4 rounded-lg sm-mx:border shadow-lg">
+
+      {signupDone ? (
+          /* ── Check Your Email Success Screen ── */
+          <>
+            <div className="text-center py-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                <IconMailForward size={32} className="text-blue-500" />
+              </div>
+              <div className="text-2xl font-semibold mb-2">Check Your Email</div>
+              <p className="text-gray-500 mb-2">
+                We've sent a verification link to:
+              </p>
+              <p className="text-blue-500 font-semibold mb-4">{registeredEmail}</p>
+              <p className="text-gray-400 text-sm mb-6">
+                Click the link in your email to verify your account. The link will expire in 24 hours.
+              </p>
+
+              <div className="flex flex-col gap-3 items-center">
+                <Button variant="filled" color="blue" onClick={() => navigate('/login')}>
+                  Go to Login
+                </Button>
+
+                {resendLoading ? (
+                  <Button variant="light" color="gray" disabled>
+                    <IconLoader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+                  </Button>
+                ) : (
+                  <Button variant="light" color="gray" onClick={handleResend}>
+                    Didn't receive it? Resend Email
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="text-center mt-4 ">
+              Have an account?{' '}
+              <Link to="/login" className="text-blue-400 hover:underline">
+                Login
+              </Link>
+            </div>
+          </>
+        ) : (
+          /* ── Signup Form ── */
+          <>
         <div className="my-5 inline-block">
           <Button 
           size="sm"
@@ -159,6 +241,8 @@ const Signup = () => {
             Login
           </Link>
         </div>
+        </>
+        )}
       </div>
     </div>
   );

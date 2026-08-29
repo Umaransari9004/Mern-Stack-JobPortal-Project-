@@ -12,6 +12,7 @@ import { persistStore } from 'redux-persist';
 import { PersistGate } from 'redux-persist/integration/react';
 import { Notifications } from '@mantine/notifications';
 import { BrowserRouter } from "react-router-dom";
+import { SocketProvider } from "./utils/socket.js";
 
 
 
@@ -36,12 +37,14 @@ function App() {
     <React.StrictMode>
       <Provider store={store} >
         <PersistGate loading={null} persistor={persistor}>
+          <SocketProvider>
           <MantineProvider theme={theme}>
             <Notifications position="top-center" zIndex={1000}/>
             <BrowserRouter>
             <AppRoutes />
             </BrowserRouter>
           </MantineProvider>
+          </SocketProvider>
         </PersistGate>
       </Provider>
     </React.StrictMode>

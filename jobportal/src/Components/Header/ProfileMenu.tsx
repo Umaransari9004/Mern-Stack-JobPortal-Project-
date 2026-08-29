@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { notifications } from '@mantine/notifications';
 import { setUser } from '../../Slices/Userslice.tsx';
+import { clearChatState } from '../../Slices/ChatSlice.tsx';
 import { USER_API_END_POINT } from '../../utils/constant.js';
 
 const ProfileMenu = () => {
@@ -19,18 +20,22 @@ const ProfileMenu = () => {
       const res = await axios.get(`${USER_API_END_POINT}/logout`, { withCredentials: true });
       if (res.data.success) {
         dispatch(setUser(null));
+        dispatch(clearChatState());
         navigate('/');
         notifications.show({
-          message: (res.data.message),
+          message: res.data.message,
           withBorder: true,
           className: '!border-blue-500',
         });
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.log(error);
+      const errorMessage = axios.isAxiosError(error)
+        ? error?.response?.data?.message || 'Logout failed'
+        : 'Logout failed';
       notifications.show({
-        message: (error.response.data.message),
-        color: "red",
+        message: errorMessage,
+        color: 'red',
         withBorder: true,
         className: '!border-red-500',
       });
@@ -71,9 +76,9 @@ export default ProfileMenu;
 
 
 
-  {/* Always render "Profile" link */}
-        {/* <Link to="/profile">
-          <Menu.Item leftSection={<IconUserCircle size={14} />}>
-            Profile
-          </Menu.Item>
-        </Link> */}
+  // {/* Always render "Profile" link */}
+  //       {/* <Link to="/profile">
+  //         <Menu.Item leftSection={<IconUserCircle size={14} />}>
+  //           Profile
+  //         </Menu.Item>
+  //       </Link> */}

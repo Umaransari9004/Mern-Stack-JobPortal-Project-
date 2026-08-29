@@ -5,7 +5,7 @@ import axios from 'axios'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
-const useGetCompanyById = (companyId) => {
+const useGetCompanyById = (companyId:any) => {
     const dispatch = useDispatch();
     useEffect(()=>{
         const fetchSingleCompany = async () => {

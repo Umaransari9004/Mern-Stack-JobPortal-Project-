@@ -5,7 +5,9 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import useSavedJobs from '../../hooks/useGetAllSavedJob.tsx';
 
-const JobCard = (job: any) => {
+const JobCard = (props: any) => {
+  // Separate hideSave from the rest of the job data
+  const { hideSave, ...job } = props;
 
   const { allSavedJobs } = useSelector((store: any) => store.job);
   const { saveJob, unsaveJob } = useSavedJobs();
@@ -24,7 +26,7 @@ const JobCard = (job: any) => {
     return Math.floor(timeDifference / (1000 * 60 * 60 * 24));
   };
 
-  const savedJobIds = allSavedJobs.map(job => job._id);
+  const savedJobIds = allSavedJobs.map((job: any) => job._id);
   const handleSaveToggle = () => {
     if (savedJobIds.includes(job._id)) {
       unsaveJob(job._id);
@@ -45,11 +47,12 @@ const JobCard = (job: any) => {
           <div className="text-xs text-gray-700">{job?.company?.name} &bull; {job?.applications?.length} Applications</div>
         </div>
       </div>
-      {savedJobIds.includes(job._id) ?
-        <IconBookmarkFilled onClick={handleSaveToggle} className="cursor-pointer text-blue-500" stroke={1.5} />
-        :
-        <IconBookmark onClick={handleSaveToggle} className="text-gray-700 cursor-pointer hover:text-blue-500" stroke={1.5} />
-      }
+      {!hideSave && (
+        savedJobIds.includes(job._id) ?
+          <IconBookmarkFilled onClick={handleSaveToggle} className="cursor-pointer text-blue-500" stroke={1.5} />
+          :
+          <IconBookmark onClick={handleSaveToggle} className="text-gray-700 cursor-pointer hover:text-blue-500" stroke={1.5} />
+      )}
 
     </div>
     <div className="flex gap-2 [&>div]:py-1 [&>div]:px-2 [&>div]:bg-blue-100 [&>div]:text-blue-400 [&>div]:rounded-lg text-xs">

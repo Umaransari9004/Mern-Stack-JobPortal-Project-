@@ -13,11 +13,15 @@ const jobSlice = createSlice({
             title: '',
             type: ''
         },
+        totalPages: 1,
+        currentPage: 1,
     },
     reducers: {
         // actions
         setAllJobs: (state, action) => {
-            state.allJobs = action.payload;
+            state.allJobs = action.payload.jobs;
+            state.totalPages = action.payload.totalPages;
+            state.currentPage = action.payload.currentPage;
         },
         setSingleJob: (state, action) => {
             state.singleJob = action.payload;
@@ -33,13 +37,14 @@ const jobSlice = createSlice({
         },
         setAllSavedJobs: (state, action) => {
             state.allSavedJobs = action.payload;
-            
+
         },
         setSearchedQuery: (state, action) => {
-            return { ...state, ...action.payload };
+            state.searchedQuery = action.payload;
+            state.currentPage = 1; // ✅ reset page on new search
         },
     },
-    
+
 });
 export const {
     setAllJobs,

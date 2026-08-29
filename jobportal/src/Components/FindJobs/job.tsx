@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import JobCard from './jobCard.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetFilter } from '../../Slices/Filterslice.tsx';
+import { Pagination } from '@mantine/core';
+
 
 interface Job {
   _id: string;
@@ -9,12 +11,17 @@ interface Job {
   location: string;
   experience: string;
   jobType: string;
- 
+
 }
-const Job = () => {
+
+interface JobProps {
+  page: number;
+  setPage: (page: number) => void;
+}
+const Job = ({ page, setPage }: JobProps) => {
   const dispatch = useDispatch();
-  const { allJobs } = useSelector((store:any) => store.job);
-  const  filter  = useSelector((state:any) => state.filter);
+  const { allJobs,totalPages } = useSelector((store: any) => store.job);
+  const filter = useSelector((state: any) => state.filter);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);;
 
   useEffect(() => {
@@ -28,31 +35,33 @@ const Job = () => {
 
     // Independent filter checks
     if (filter?.jobTitle) {
-        filtered = filtered.filter(job => 
-            job.jobTitle.toLowerCase().includes(filter.jobTitle.toLowerCase())
-        );
+      filtered = filtered.filter(job =>
+        job.jobTitle.toLowerCase().includes(filter.jobTitle.toLowerCase())
+      );
     }
-    
+
     if (filter?.location) {
-        filtered = filtered.filter(job => 
-            job.location.toLowerCase().includes(filter.location.toLowerCase())
-        );
+      filtered = filtered.filter(job =>
+        job.location.toLowerCase().includes(filter.location.toLowerCase())
+      );
     }
 
     if (filter?.experience) {
-      filtered = filtered.filter(job => 
-          job.experience.toLowerCase().includes(filter.experience.toLowerCase())
+      filtered = filtered.filter(job =>
+        job.experience.toLowerCase().includes(filter.experience.toLowerCase())
       );
-  }
-    
+    }
+
     if (filter?.jobType) {
-        filtered = filtered.filter(job => 
-            job.jobType.toLowerCase().includes(filter.jobType.toLowerCase())
-        );
+      filtered = filtered.filter(job =>
+        job.jobType.toLowerCase().includes(filter.jobType.toLowerCase())
+      );
     }
 
     setFilteredJobs(filtered);
-}, [filter, allJobs]);
+  }, [filter, allJobs]);
+console.log("DEBUG → totalPages:", totalPages);
+console.log("DEBUG → allJobs length:", allJobs?.length);
 
   return (
     <div className="p-5">
@@ -61,10 +70,21 @@ const Job = () => {
       </div>
 
       <div className="mt-5 flex flex-wrap gap-10 sm-mx:gap-5 justify-around">
-        {filteredJobs.map((job:any) => 
+        {filteredJobs.map((job: any) =>
           <JobCard key={job._id} {...job} />
         )}
+        
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-20">
+          <Pagination
+            value={page}
+            onChange={setPage}
+            total={totalPages}
+          />
+        </div>
+      )}
     </div>
   );
 };

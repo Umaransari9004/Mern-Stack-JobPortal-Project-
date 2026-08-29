@@ -1,5 +1,7 @@
 import { Application } from "../modles/applicationModle.js";
 import { Job } from "../modles/jobsModel.js";
+import getDataUri from "../config/datauri.js";
+import cloudinary from "../config/cloudinary.js";
 
 export const applyJob = async (req, res) => {
     try {
@@ -29,20 +31,54 @@ export const applyJob = async (req, res) => {
                 success: false
             })
         }
-        // create a new application
+
+        // Get form fields from request body
+        const { fullName, email, phone, personalWebsite, coverLetter } = req.body;
+
+        // Handle resume upload
+        let resumeUrl = '';
+        let resumeOriginalName = '';
+
+        // Check if a new resume file was uploaded
+        const resumeFile = req.files?.resume?.[0];
+        if (resumeFile) {
+            const fileUri = getDataUri(resumeFile);
+            const cloudResponse = await cloudinary.uploader.upload(fileUri.content, {
+                resource_type: "raw",
+            });
+            resumeUrl = cloudResponse.secure_url;
+            resumeOriginalName = resumeFile.originalname;
+        } else if (req.body.existingResumeUrl) {
+            // Use existing resume from profile
+            resumeUrl = req.body.existingResumeUrl;
+            resumeOriginalName = req.body.existingResumeName || 'Resume';
+        }
+
+        // create a new application with form data
         const newApplication = await Application.create({
-            job:jobId,
-            applicant:userId,
+            job: jobId,
+            applicant: userId,
+            fullName: fullName || '',
+            email: email || '',
+            phone: phone || '',
+            personalWebsite: personalWebsite || '',
+            resume: resumeUrl,
+            resumeOriginalName: resumeOriginalName,
+            coverLetter: coverLetter || '',
         });
 
         job.applications.push(newApplication._id);
         await job.save();
         return res.status(201).json({
-            message:"Job applied successfully.",
-            success:true
+            message: "Job applied successfully.",
+            success: true
         })
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Internal server error",
+            success: false
+        });
     }
 };
 export const getAppliedJobs = async (req,res) => {

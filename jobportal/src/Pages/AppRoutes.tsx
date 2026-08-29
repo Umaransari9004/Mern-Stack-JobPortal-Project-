@@ -20,6 +20,12 @@ import JobHistoryPage from './JobHistoryPage.tsx'
 import ProtectedRoute from '../utils/ProtectedRoute.tsx'
 import FindTalentPage from './FindTalentPage.tsx'
 import TalentProfilePage from './TalentProfilePage.tsx'
+import ChatBot from '../Components/ChatBot/ChatBot.tsx'
+import MessagesPage from './MessagesPage.tsx'
+import CompanyDescPage from './CompanyDescPage.tsx'
+import ForgotPassword from '../Components/SignupLogin/ForgotPassword.tsx'
+import ResetPassword from '../Components/SignupLogin/ResetPassword.tsx'
+import VerifyEmail from '../Components/SignupLogin/VerifyEmail.tsx'
 
 const AppRoutes = () => {
     return (
@@ -34,28 +40,38 @@ const AppRoutes = () => {
                     <Route path="/job-desc/:id" element={<JobDescPage />} />
                     <Route path="/signup" element={<SignupPage />} />
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password/:token" element={<ResetPassword />} />
+                    <Route path="/verify-email/:token" element={<VerifyEmail />} />
                     <Route path="/profile" element={<ProtectedRoute role="student"><ProfilePage /></ProtectedRoute>} />
                     <Route path="/jobhistory" element={<ProtectedRoute role="student"><JobHistoryPage /></ProtectedRoute>} />
+                    <Route path="/company/:id" element={<CompanyDescPage />} />
 
                     {/* Employer Page Routes */}
                     <Route path="/companies" element={<ProtectedRoute role="employer"><CreatCompanies /></ProtectedRoute>} />
                     <Route path="/companies-post" element={<ProtectedRoute role="employer"><PostCompanies /></ProtectedRoute>} />
                     <Route path="/companies-post/:id" element={<ProtectedRoute role="employer"><CompanySetup /></ProtectedRoute>} />
                     <Route path="/find-Talent" element={<ProtectedRoute role="employer"><FindTalentPage /></ProtectedRoute>} />
-                    <Route path="/talent-Profile" element={<ProtectedRoute role="employer"><TalentProfilePage /></ProtectedRoute>} />
+                    <Route path="/talent-Profile/:id" element={<ProtectedRoute role="employer"><TalentProfilePage /></ProtectedRoute>} />
 
 
                     {/* Posted Job Table */}
                     <Route path="/post-job" element={<ProtectedRoute role="employer"><PostJobPage /></ProtectedRoute>} />
+                    <Route path="/post-job/:id" element={<ProtectedRoute role="employer"><PostJobPage /></ProtectedRoute>} />
                     <Route path="/jobs-Table" element={<ProtectedRoute role="employer"><JobsTable /></ProtectedRoute>} />
 
                     {/* Applicant Table */}
                     <Route path="/jobs-Table/:id/applicants" element={<ProtectedRoute role="employer"><Applicants /></ProtectedRoute>} />
+
+                    {/* Messages */}
+                    <Route path="/messages" element={<MessagesPage />} />
+                    <Route path="/messages/:userId" element={<MessagesPage />} />
                     <Route path="*" element={<HomePage />} />
                 </Routes>
             </div>
 
             <Footer />
+            <ChatBot/>
         </div>
     )
 }
