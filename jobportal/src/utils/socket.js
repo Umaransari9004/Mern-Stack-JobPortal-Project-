@@ -4,7 +4,8 @@ import { io } from 'socket.io-client';
 import axios from 'axios';
 import { setConversations } from '../Slices/ChatSlice.tsx';
 
-const MESSAGE_API_END_POINT = "http://localhost:8000/api/v1/message";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const MESSAGE_API_END_POINT = `${BASE_URL}/api/v1/message`;
 
 const SocketContext = createContext(null);
 
@@ -30,7 +31,7 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (user) {
-            const socketInstance = io('http://localhost:8000', {
+            const socketInstance = io(BASE_URL, {
                 query: { userId: user._id },
                 withCredentials: true,
             });

@@ -27,12 +27,12 @@ app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 app.use(morgan("dev"));
 const allowedOrigins = [
-  "http://localhost:3000", // CRA dev (if running separately)
-  "http://localhost:8000", // React served by backend (YOUR CURRENT CASE)
+  "http://localhost:3000",
+  "http://localhost:8000",
   "http://127.0.0.1:3000",
   "http://127.0.0.1:8000",
-  "https://mern-stack-jobportal-project.onrender.com"
-];
+  process.env.FRONTEND_URL,   // ← Vercel URL (set in Render env vars)
+].filter(Boolean);
 
 app.use(
   cors({
