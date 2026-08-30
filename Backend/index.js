@@ -61,10 +61,9 @@ app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use("/api/v1/message", messageRoute);
 
-app.use(express.static(path.join(__dirname, "/jobportal/build")));
-app.get('*', (_,res) => {
-    res.sendFile(path.resolve(__dirname, "jobportal", "build", "index.html"));
-})
+app.get('/', (req, res) => {
+    res.json({ message: "JobPortal API is running", success: true });
+});
 
 const PORT = process.env.PORT || 3000
 server.listen(PORT, () => {
