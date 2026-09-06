@@ -1,5 +1,5 @@
 import React from 'react'
-import { Route, Routes } from 'react-router-dom' 
+import { Route, Routes, useLocation } from 'react-router-dom' 
 import Header from '../Components/Header/header.tsx'
 import { Divider } from '@mantine/core'
 import FindJobs from './FindJobs.tsx'
@@ -28,6 +28,28 @@ import ResetPassword from '../Components/SignupLogin/ResetPassword.tsx'
 import VerifyEmail from '../Components/SignupLogin/VerifyEmail.tsx'
 
 const AppRoutes = () => {
+    const location = useLocation();
+
+    // Pages where footer should NOT appear
+    const hideFooterPaths = [
+        '/login',
+        '/signup',
+        '/forgot-password',
+        '/reset-password',
+        '/verify-email',
+        '/messages',
+        '/profile',
+        '/jobhistory',
+        '/companies',
+        '/companies-post',
+        '/post-job',
+        '/jobs-Table',
+    ];
+
+    const showFooter = !hideFooterPaths.some(path => 
+        location.pathname.startsWith(path)
+    );
+
     return (
         <div className="app-container relative">
             <Header />
@@ -70,7 +92,7 @@ const AppRoutes = () => {
                 </Routes>
             </div>
 
-            <Footer />
+            {showFooter && <Footer />}
             <ChatBot/>
         </div>
     )
