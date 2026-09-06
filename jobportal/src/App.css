@@ -45,4 +45,10 @@
 
 .content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content > div {
+  flex: 1;
 }
