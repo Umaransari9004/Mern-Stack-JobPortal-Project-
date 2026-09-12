@@ -5,7 +5,8 @@ const UserSlice=createSlice({
     name:"auth",
     initialState:{
     loading:false,
-    user:null
+    user:null,
+    token:null
     },
     reducers:{
         setUser:(state, action)=>{
@@ -15,7 +16,10 @@ const UserSlice=createSlice({
         setLoading:(state, action) => {
             state.loading = action.payload;
         },
+        setToken:(state, action) => {
+            state.token = action.payload;
+        },
     }
 });
-export const {setUser, setLoading}=UserSlice.actions;
+export const {setUser, setLoading, setToken}=UserSlice.actions;
 export default UserSlice.reducer;

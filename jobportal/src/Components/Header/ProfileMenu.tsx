@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { notifications } from '@mantine/notifications';
-import { setUser } from '../../Slices/Userslice.tsx';
+import { setUser, setToken } from '../../Slices/Userslice.tsx';
 import { clearChatState } from '../../Slices/ChatSlice.tsx';
 import { USER_API_END_POINT } from '../../utils/constant.js';
 
@@ -20,6 +20,7 @@ const ProfileMenu = () => {
       const res = await axios.get(`${USER_API_END_POINT}/logout`, { withCredentials: true });
       if (res.data.success) {
         dispatch(setUser(null));
+        dispatch(setToken(null));
         dispatch(clearChatState());
         navigate('/');
         notifications.show({

@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { notifications } from '@mantine/notifications';
 import { USER_API_END_POINT } from '../../utils/constant.js';
-import { setLoading, setUser } from '../../Slices/Userslice.tsx';
+import { setLoading, setUser, setToken } from '../../Slices/Userslice.tsx';
 
 const Login = () => {
   const form = useForm({
@@ -37,6 +37,7 @@ const Login = () => {
 
       if (res.data.success) {
         dispatch(setUser(res.data.user));
+        dispatch(setToken(res.data.token));
         navigate('/');
         notifications.show({
           title: 'Login Successful',

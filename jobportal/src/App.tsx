@@ -13,6 +13,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { Notifications } from '@mantine/notifications';
 import { BrowserRouter } from "react-router-dom";
 import { SocketProvider } from "./utils/socket.js";
+import './utils/axiosConfig.js';
 
 
 
