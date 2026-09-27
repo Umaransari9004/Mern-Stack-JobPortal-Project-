@@ -57,7 +57,7 @@ const ProfileMenu = () => {
       </Menu.Target>
 
       <Menu.Dropdown onChange={() => setOpened(true)}>
-        {user && user.role === 'student' && (
+        {user && (
           <Link to="/profile">
             <Menu.Item leftSection={<IconUserCircle size={14} />}>
               View Profile

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  role: 'student' | 'employer';
+  role?: 'student' | 'employer';
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, role }) => {
@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, role }) => {
     useEffect(() => {
         if (!user) {
             navigate("/login");
-        } else {
+        } else if (role) {
             if (role === 'student' && user.role === 'employer') {
                 navigate("/companies");
             } else if (role === 'employer' && user.role === 'student') {
@@ -24,7 +24,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, role }) => {
         }
     }, [user, navigate, role]);
 
-    return user?.role === role ? <>{children}</> : null;
+    if (!user) return null;
+    if (role && user.role !== role) return null;
+    
+    return <>{children}</>;
 };
 
 export default ProtectedRoute;

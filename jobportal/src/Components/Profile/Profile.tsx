@@ -621,10 +621,12 @@ const Profile = () => {
                                 <input value={headerForm.location} onChange={(e) => setHeaderForm({ ...headerForm, location: e.target.value })} placeholder="Enter Job Location" className={`${inputClass} !pl-9`} />
                             </div>
                         </div>
-                        <div>
-                            <label className="text-xs font-semibold text-gray-600 mb-1 block">Experience <span className="text-red-500">*</span></label>
-                            <input value={headerForm.experience} onChange={(e) => setHeaderForm({ ...headerForm, experience: e.target.value })} placeholder="e.g. 3 Years" className={inputClass} />
-                        </div>
+                        {user?.role === 'student' && (
+                            <div>
+                                <label className="text-xs font-semibold text-gray-600 mb-1 block">Experience <span className="text-red-500">*</span></label>
+                                <input value={headerForm.experience} onChange={(e) => setHeaderForm({ ...headerForm, experience: e.target.value })} placeholder="e.g. 3 Years" className={inputClass} />
+                            </div>
+                        )}
                         <div>
                             <label className="text-xs font-semibold text-gray-600 mb-1 block">Phone Number</label>
                             <div className="relative">
@@ -632,13 +634,15 @@ const Profile = () => {
                                 <input value={headerForm.phoneNumber} onChange={(e) => setHeaderForm({ ...headerForm, phoneNumber: e.target.value })} placeholder="e.g. 9004583988" className={`${inputClass} !pl-9`} />
                             </div>
                         </div>
-                        <div>
-                            <label className="text-xs font-semibold text-gray-600 mb-1 block">Expected CTC</label>
-                            <div className="relative">
-                                <IconCoin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                <input value={headerForm.expectedCtc} onChange={(e) => setHeaderForm({ ...headerForm, expectedCtc: e.target.value })} placeholder="e.g. ₹48 - 60LPA" className={`${inputClass} !pl-9`} />
+                        {user?.role === 'student' && (
+                            <div>
+                                <label className="text-xs font-semibold text-gray-600 mb-1 block">Expected CTC</label>
+                                <div className="relative">
+                                    <IconCoin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input value={headerForm.expectedCtc} onChange={(e) => setHeaderForm({ ...headerForm, expectedCtc: e.target.value })} placeholder="e.g. ₹48 - 60LPA" className={`${inputClass} !pl-9`} />
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 ) : (
                     /* ── Header Display ── */
@@ -655,7 +659,7 @@ const Profile = () => {
                                 <span>{user.profile.location}</span>
                             </div>
                         )}
-                        {user?.profile?.experience && (
+                        {user?.role === 'student' && user?.profile?.experience && (
                             <div className="flex items-center gap-1.5 text-gray-600">
                                 <IconClock size={16} className="text-gray-500 shrink-0" stroke={1.5} />
                                 <span>Experience: {user.profile.experience}</span>
@@ -706,6 +710,8 @@ const Profile = () => {
             <Divider mx="md" my="xl" />
 
 
+            {user?.role === 'student' && (
+                <>
             {/* ═══════════════════════════════════════════════
                 SKILLS
             ═══════════════════════════════════════════════ */}
@@ -1122,6 +1128,8 @@ const Profile = () => {
                 </div>
             </div>
 
+                </>
+            )}
             <Divider mx="md" my="xl" />
 
 
@@ -1183,13 +1191,15 @@ const Profile = () => {
                     </div>
                 )}
             </div>
-                        <div className="flex justify-center mt-6">
-                            <button onClick={downloadResumePDF} disabled={downloading}
-                                className="flex items-center gap-2 px-6 py-2.5 bg-blue-400 text-white text-sm font-semibold rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50 shadow-sm" title="Download as Resume PDF">
-                                {downloading ? <IconLoader2 size={16} className="animate-spin" /> : <IconDownload size={16} />}
-                                {downloading ? 'Generating...' : 'Save as PDF'}
-                            </button>
-                        </div>
+                        {user?.role === 'student' && (
+                            <div className="flex justify-center mt-6">
+                                <button onClick={downloadResumePDF} disabled={downloading}
+                                    className="flex items-center gap-2 px-6 py-2.5 bg-blue-400 text-white text-sm font-semibold rounded-lg hover:bg-blue-500 transition-colors disabled:opacity-50 shadow-sm" title="Download as Resume PDF">
+                                    {downloading ? <IconLoader2 size={16} className="animate-spin" /> : <IconDownload size={16} />}
+                                    {downloading ? 'Generating...' : 'Save as PDF'}
+                                </button>
+                            </div>
+                        )}
         </div>
     );
 };
