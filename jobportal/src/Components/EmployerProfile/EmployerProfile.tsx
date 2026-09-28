@@ -48,7 +48,7 @@ const EmployerProfile = () => {
         const file = e.target.files?.[0];
         if (!file) return;
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('profilePhoto', file);
         try {
             const res = await axios.post(`${USER_API_END_POINT}/profile/update`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }, withCredentials: true
