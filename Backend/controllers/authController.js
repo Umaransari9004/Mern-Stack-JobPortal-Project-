@@ -167,7 +167,8 @@ export const updateProfile = async (req, res) => {
         const {
             name, email, phoneNumber, bio, skills,
             jobTitle, currentCompany, location, expectedCtc,
-            experience, education, linkedIn, github, portfolio
+            experience, education, linkedIn, github, portfolio,
+            removeProfilePhoto
         } = req.body;
 
         const userId = req.id;
@@ -203,7 +204,9 @@ export const updateProfile = async (req, res) => {
         if (portfolio !== undefined) user.profile.portfolio = portfolio;
 
         // ── Profile photo upload ──
-        if (profilePhotoFile) {
+        if (removeProfilePhoto === 'true') {
+            user.profile.profilePhoto = '';
+        } else if (profilePhotoFile) {
             const fileUri = getDataUri(profilePhotoFile);
             const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
             user.profile.profilePhoto = cloudResponse.secure_url;

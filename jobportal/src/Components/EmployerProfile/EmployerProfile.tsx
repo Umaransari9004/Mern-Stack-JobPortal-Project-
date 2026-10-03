@@ -3,7 +3,7 @@ import {
     IconEdit, IconMail, IconPhone, IconMapPin,
     IconBrandLinkedin, IconBrandGithub, IconWorld,
     IconCheck, IconX, IconLoader2,
-    IconBuilding, IconUpload, IconPhoto
+    IconBuilding, IconUpload, IconPhoto, IconTrash
 } from '@tabler/icons-react'
 import React, { useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -22,6 +22,7 @@ const EmployerProfile = () => {
     // ── Editing states ──
     const [editingSection, setEditingSection] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
+    const [logoUploading, setLogoUploading] = useState(false);
 
     // ── Personal Info form ──
     const [infoForm, setInfoForm] = useState({
@@ -47,6 +48,7 @@ const EmployerProfile = () => {
     const logoUploadHandler = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        setLogoUploading(true);
         const formData = new FormData();
         formData.append('profilePhoto', file);
         try {
@@ -55,6 +57,20 @@ const EmployerProfile = () => {
             });
             if (res.data.success) { dispatch(setUser(res.data.user)); showSuccess('Company logo updated'); }
         } catch (e: any) { showError(e); }
+        finally { setLogoUploading(false); if (logoInputRef.current) logoInputRef.current.value = ''; }
+    };
+
+    const removeLogo = async () => {
+        setLogoUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('removeProfilePhoto', 'true');
+            const res = await axios.post(`${USER_API_END_POINT}/profile/update`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }, withCredentials: true
+            });
+            if (res.data.success) { dispatch(setUser(res.data.user)); showSuccess('Company logo removed'); }
+        } catch (e: any) { showError(e); }
+        finally { setLogoUploading(false); }
     };
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -172,7 +188,14 @@ const EmployerProfile = () => {
                                 <IconBuilding size={28} className="text-gray-400" stroke={1.5} />
                             </div>
                         )}
-                        {hovered && (
+                        {/* Loading overlay */}
+                        {logoUploading && (
+                            <div className="absolute inset-0 bg-black/60 rounded-xl flex items-center justify-center">
+                                <IconLoader2 size={24} className="text-white animate-spin" />
+                            </div>
+                        )}
+                        {/* Hover overlay (only when not uploading) */}
+                        {hovered && !logoUploading && (
                             <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center" onClick={() => logoInputRef.current?.click()}>
                                 <IconPhoto size={22} className="text-white" />
                             </div>
@@ -180,12 +203,21 @@ const EmployerProfile = () => {
                     </div>
                     <div>
                         <p className="text-sm font-semibold text-gray-900">{companyLogo ? 'Company Logo' : 'Add Company Logo'}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">Click on the icon to {companyLogo ? 'change' : 'upload'} your logo</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{logoUploading ? 'Uploading...' : `Click on the icon to ${companyLogo ? 'change' : 'upload'} your logo`}</p>
                         <input ref={logoInputRef} type="file" accept="image/*" onChange={logoUploadHandler} className="hidden" />
-                        <button onClick={() => logoInputRef.current?.click()}
-                            className="flex items-center gap-1.5 mt-2 px-3 py-1.5 bg-blue-50 text-blue-500 text-xs font-semibold rounded-lg hover:bg-blue-100 transition-colors">
-                            <IconUpload size={14} /> {companyLogo ? 'Change Logo' : 'Upload Logo'}
-                        </button>
+                        <div className="flex items-center gap-2 mt-2">
+                            <button onClick={() => logoInputRef.current?.click()} disabled={logoUploading}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-500 text-xs font-semibold rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50">
+                                {logoUploading ? <IconLoader2 size={14} className="animate-spin" /> : <IconUpload size={14} />}
+                                {logoUploading ? 'Uploading...' : (companyLogo ? 'Change Logo' : 'Upload Logo')}
+                            </button>
+                            {companyLogo && !logoUploading && (
+                                <button onClick={removeLogo}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-500 text-xs font-semibold rounded-lg hover:bg-red-100 transition-colors">
+                                    <IconTrash size={14} /> Remove
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 
