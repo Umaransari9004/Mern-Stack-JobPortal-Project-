@@ -43,7 +43,7 @@ const ProfileMenu = () => {
     }
   };
 
-  const profilePhoto = user?.profile?.profilePhoto || null;
+  const profilePhoto = user?.role === 'employer' ? null : (user?.profile?.profilePhoto || null);
   const userInitial = user?.name?.charAt(0).toUpperCase() || '';
   return (
     <Menu shadow="md" width={200} opened={opened} onChange={setOpened}>
